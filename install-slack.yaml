@@ -1,15 +1,11 @@
 - name: Install VSCode
   hosts: localhost
   tasks:
-    - name: Check if gpg key Slack is already present
-      ansible.builtin.shell: rpm -q --queryformat "%{SUMMARY}\n" $(rpm -q gpg-pubkey) | grep -a "Slack" | wc -l
-      changed_when: false
-      register: rpm
-
-    - name: Rpm install gpg key Slack
-      ansible.builtin.shell: rpm --import https://slack.com/gpg/slack_pubkey_20240822.gpg
+    - name: Import Slack key
       become: true
-      when: rpm.stdout == "0"
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://slack.com/gpg/slack_pubkey_20240822.gpg
 
     - name: Creating /etc/yum.repos.d/slack.repo
       become: true

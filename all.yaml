@@ -1,0 +1,11 @@
+- name: Install vscode
+  ansible.builtin.import_playbook: install-code.yaml
+
+- name: Install docker-ce
+  ansible.builtin.import_playbook: install-docker.yaml
+
+- name: Install Slack
+  ansible.builtin.import_playbook: install-slack.yaml
+
+- name: Install Tools
+  ansible.builtin.import_playbook: install-tools.yaml

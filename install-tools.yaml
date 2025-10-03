@@ -3,45 +3,72 @@
   tasks:
 
     - name: Check if rpmfusion-nonfree-steam is already enabled
-      ansible.builtin.shell: dnf repolist | grep -a "rpmfusion-nonfree-steam " | wc -l
+      ansible.builtin.shell: |
+        set -o pipefail
+        dnf repolist | grep -a "rpmfusion-nonfree-steam " || echo "go"
       changed_when: false
       register: rpm
 
     - name: Enabled rpmfusion-nonfree-steam
-      ansible.builtin.shell: dnf config-manager setopt rpmfusion-nonfree-steam.enabled=1
+      ansible.builtin.command: dnf config-manager setopt rpmfusion-nonfree-steam.enabled=1
+      changed_when: true
       become: true
-      when: rpm.stdout == "0"
+      when: rpm.stdout == "go"
 
     - name: Check if google-chrome is already enabled
-      ansible.builtin.shell: dnf repolist | grep -a "google-chrome " | wc -l
+      ansible.builtin.shell: |
+        set -o pipefail
+        dnf repolist | grep -a "google-chrome " || echo "go"
       changed_when: false
       register: rpm
 
     - name: Enabled google-chrome
-      ansible.builtin.shell: dnf config-manager setopt google-chrome.enabled=1
+      ansible.builtin.command: dnf config-manager setopt google-chrome.enabled=1
+      changed_when: true
       become: true
-      when: rpm.stdout == "0"
-      
+      when: rpm.stdout == "go"
+
+    - name: Import rpmfusion-free key
+      become: true
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-fedora-2020
+
+    - name: Import rpmfusion-nonfree key
+      become: true
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-nonfree-fedora-2020
 
     - name: Check if rpmfusion-free is already present
-      ansible.builtin.shell: dnf repolist --all | grep -a "rpmfusion-free " | wc -l
+      ansible.builtin.shell: |
+        set -o pipefail
+        dnf repolist --all | grep -a "rpmfusion-free " || echo "go"
       changed_when: false
       register: rpm
 
     - name: Register rpmfusion-free
-      ansible.builtin.shell: rpm --import 'https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-fedora-2020' && sync && dnf install 'https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-'$(rpm -E %fedora)'.noarch.rpm' -y && sync
+      ansible.builtin.shell: sync && dnf install 'https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-'$(rpm -E %fedora)'.noarch.rpm' -y && sync
+      changed_when: true
       become: true
-      when: rpm.stdout == "0"
+      when: rpm.stdout == "go"
 
     - name: Check if rpmfusion-nonfree is already present
-      ansible.builtin.shell: dnf repolist --all | grep -a "rpmfusion-nonfree " | wc -l
+      ansible.builtin.shell: |
+        set -o pipefail
+        dnf repolist --all | grep -a "rpmfusion-nonfree " || echo "go"
       changed_when: false
       register: rpm
 
     - name: Register rpmfusion-nonfree
-      ansible.builtin.shell: rpm --import 'https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-nonfree-fedora-2020' && sync && dnf install 'https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-'$(rpm -E %fedora)'.noarch.rpm' -y && sync
+      ansible.builtin.shell: |
+        sync &&\
+        dnf install 'https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-'$(rpm -E %fedora)'.noarch.rpm' -y &&\
+        sync
+      register: result
+      changed_when: '"Nothing to do." not in result.stdout'
       become: true
-      when: rpm.stdout == "0"
+      when: rpm.stdout == "go"
 
 
     - name: Install a list of packages
@@ -58,30 +85,41 @@
           - dropbox
           - steam
           - libreoffice
-          - openal-sof3t-devel
+          - openal-soft-devel
           - SDL2-devel
           - SDL3-devel
           - libglvnd-devel
           - '@Development Libraries'
+          - rpmfusion-nonfree-release-tainted
+          - rpmfusion-free-release-tainted
         state: present
 
     - name: Check if ffmpeg-free is present
-      ansible.builtin.shell: rpm -qa | grep -a "ffmpeg-free" | wc -l
+      ansible.builtin.shell: |
+        set -o pipefail
+        rpm -qa | grep -a "ffmpeg-free" || echo "gone"
       changed_when: false
       register: rpm
 
     - name: Swap ffmpeg-free ffmpeg
-      ansible.builtin.shell: dnf swap ffmpeg-free ffmpeg --allowerasing -y
+      ansible.builtin.shell: |
+        dnf swap ffmpeg-free ffmpeg --allowerasing -y
+      register: result
+      changed_when: '"Nothing to do." not in result.stdout'
       become: true
-      when: rpm.stdout == "1"
+      when: not rpm.stdout == "gone"
 
     - name: Update multimedia group
-      ansible.builtin.shell: dnf update @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin -y
+      ansible.builtin.command: dnf update @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin -y
       become: true
+      register: result
+      changed_when: '"Nothing to do." not in result.stdout'
       when: rpm.stdout == "1"
 
     - name: Check if amdgpu is preset
-      ansible.builtin.shell: lspci -k | grep -EA3 'VGA|3D|Display' | grep amdgpu | wc -l
+      ansible.builtin.shell: |
+        set -o pipefail
+        lspci -k | grep -EA3 'VGA|3D|Display' | grep amdgpu || echo "go"
       changed_when: false
       register: amdgpu
 
@@ -90,42 +128,36 @@
       become: true
       register: result
       changed_when: '"Nothing to do." not in result.stdout'
-      when: not amdgpu.stdout == "0"
-
-    - name: Check if libdvdcss is present
-      ansible.builtin.shell: rpm -qa | grep -a "libdvdcss" | wc -l
-      become: true
-      changed_when: false      
-      register: rpm
+      when: not amdgpu.stdout == "go"
 
     - name: Install libdvdcss
-      ansible.builtin.shell: dnf install rpmfusion-free-release-tainted -y && dnf install libdvdcss -y
       become: true
-      when: rpm.stdout == "0"
+      ansible.builtin.dnf5:
+        name:
+          - libdvdcss
+        state: present
+
+    - name: Install firmwares from rpmfusion-nonfree-tainted
+      ansible.builtin.shell: dnf --repo=rpmfusion-nonfree-tainted install "*-firmware" -y
+      become: true
+      register: result
+      changed_when: '"Nothing to do." not in result.stdout'
 
     - name: NonFree firmwares
-      ansible.builtin.shell: rpm -qa | grep -a "rpmfusion-nonfree-release-tainted" | wc -l
-      changed_when: false
-      become: true
-      register: rpm
-
-    - name: Install libdvdcss
-      ansible.builtin.shell: dnf install rpmfusion-nonfree-release-tainted -y && dnf --repo=rpmfusion-nonfree-tainted install "*-firmware" -y
-      become: true
-      when: rpm.stdout == "0"
-
-    - name: NonFree firmwares
-      ansible.builtin.shell: flatpak remotes | grep flathub | wc -l
+      ansible.builtin.shell: |
+        set -o pipefail
+        flatpak remotes | grep flathub || echo "go"
       changed_when: false
       register: flatpak
 
-    - name: Install libdvdcss
-      ansible.builtin.shell: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-      when: flatpak.stdout == "0"
+    - name: Add flathub repo
+      ansible.builtin.command: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+      changed_when: true
+      when: flatpak.stdout == "go"
 
     - name: Install the flatpak packages from flathub
       community.general.flatpak:
-        name: "{{ item  }}"
+        name: "{{ item }}"
         state: present
       loop:
         - com.jetbrains.Rider

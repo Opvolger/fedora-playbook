@@ -1,0 +1,44 @@
+- name: Install tools + multimedia
+  hosts: localhost
+  tasks:
+
+    - name: Check if docker repo is present
+      ansible.builtin.shell: |
+        set -o pipefail
+        dnf repolist | grep -a "docker" || echo "go"
+      args:
+        executable: /bin/bash
+      changed_when: false
+      register: rpm
+
+    - name: Add docker repo
+      ansible.builtin.shell: |
+        dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo
+      changed_when: true
+      become: true
+      when: rpm.stdout == "go"
+
+    - name: Install a list of packages
+      become: true
+      ansible.builtin.dnf5:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+          - helm
+        state: present
+
+    - name: Enable service docker
+      become: true
+      ansible.builtin.systemd_service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Install/Update kubectl
+      ansible.builtin.shell: |
+        curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && \
+        chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+      become: true
