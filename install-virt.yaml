@@ -16,6 +16,14 @@
       changed_when: true
       when: rpm.stdout == "go"
 
+    - name: Ensure the iptables as firewall_backend
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/libvirt/network.conf
+        regexp: '^firewall_backend'
+        insertafter: '^#firewall_backend '
+        line: firewall_backend = "iptables"
+
     - name: Enable service libvirtd
       become: true
       ansible.builtin.systemd_service:

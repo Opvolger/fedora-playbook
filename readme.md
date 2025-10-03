@@ -3,8 +3,10 @@
 Install ansible
 
 ```bash
-sudo yum install ansible python3-pip
+sudo yum install ansible python3-pip git
 pip install ansible-dev-tools # for ansible-lint
+git clone https://github.com/Opvolger/fedora-playbook.git
+cd fedora-playbook
 ssh-keygen -t ed25519 -C "bas@opvolger.net" # create new ssh-key
 ```
 
