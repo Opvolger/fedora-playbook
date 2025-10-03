@@ -9,3 +9,6 @@
 
 - name: Install Tools
   ansible.builtin.import_playbook: install-tools.yaml
+
+- name: Install Virtualization
+  ansible.builtin.import_playbook: install-virt.yaml

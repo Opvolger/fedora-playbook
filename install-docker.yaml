@@ -1,4 +1,4 @@
-- name: Install tools + multimedia
+- name: Install Docker CE
   hosts: localhost
   tasks:
 
