@@ -1,0 +1,14 @@
+- name: Locale conf
+  hosts: localhost
+  tasks:
+
+    - name: Creating /etc/locale.conf
+      become: true
+      ansible.builtin.copy:
+        dest: "/etc/locale.conf"
+        content: |
+          LANG="en_US.UTF-8"
+          LC_TIME="C.UTF-8"
+        owner: root
+        group: root
+        mode: u=rw,g=r,o=r

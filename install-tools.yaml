@@ -58,6 +58,10 @@
           - dropbox
           - steam
           - libreoffice
+          - openal-sof3t-devel
+          - SDL2-devel
+          - SDL3-devel
+          - libglvnd-devel
           - '@Development Libraries'
         state: present
 

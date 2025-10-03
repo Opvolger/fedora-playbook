@@ -11,12 +11,6 @@
       become: true
       when: rpm.stdout == "0"
 
-    - name: Get stats of /etc/yum.repos.d/slack.repo
-      ansible.builtin.stat:
-        path: /etc/yum.repos.d/slack.repo
-      register: repo
-      become: true
-
     - name: Creating /etc/yum.repos.d/slack.repo
       become: true
       ansible.builtin.copy:
@@ -33,7 +27,6 @@
         owner: root
         group: root
         mode: u=rw,g=r,o=r
-      when: not repo.stat.exists
 
     - name: Install the latest version of slack
       ansible.builtin.dnf:

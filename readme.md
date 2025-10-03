@@ -15,7 +15,7 @@ create file `~/.ansible.cfg`
 host_key_checking = False
 hash_behaviour=merge
 callbacks_enabled = profile_tasks, timer
-private_key_file = /home/opvolger/.ssh/id_ed25519
+private_key_file = ~/.ssh/id_ed25519
 stdout_callback = yaml
 forks=15
 pipelining = True
