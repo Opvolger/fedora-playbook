@@ -1,0 +1,29 @@
+- name: Install VSCode
+  hosts: localhost
+  tasks:
+    - name: Check if gpg key Microsoft is already present
+      ansible.builtin.shell: rpm -q --queryformat "%{SUMMARY}\n" $(rpm -q gpg-pubkey) | grep -a "Microsoft" | wc -l
+      changed_when: false
+      register: rpm
+
+    - name: Rpm install gpg key Microsoft
+      ansible.builtin.shell: rpm --import https://packages.microsoft.com/keys/microsoft.asc
+      become: true
+      when: rpm.stdout == "0"
+
+    - name: Get stats of /etc/yum.repos.d/vscode.repo
+      ansible.builtin.stat:
+        path: /etc/yum.repos.d/vscode.repo
+      register: repo
+      become: true
+
+    - name: Create /etc/yum.repos.d/vscode.repo if not present
+      ansible.builtin.shell: echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\nautorefresh=1\ntype=rpm-md\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null
+      become: true
+      when: not repo.stat.exists
+
+    - name: Install the latest version of VS Code
+      ansible.builtin.dnf:
+        name: code
+        state: latest
+      become: true

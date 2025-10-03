@@ -1,0 +1,132 @@
+- name: Install tools + multimedia
+  hosts: localhost
+  tasks:
+
+    - name: Check if rpmfusion-nonfree-steam is already enabled
+      ansible.builtin.shell: dnf repolist | grep -a "rpmfusion-nonfree-steam " | wc -l
+      changed_when: false
+      register: rpm
+
+    - name: Enabled rpmfusion-nonfree-steam
+      ansible.builtin.shell: dnf config-manager setopt rpmfusion-nonfree-steam.enabled=1
+      become: true
+      when: rpm.stdout == "0"
+
+    - name: Check if google-chrome is already enabled
+      ansible.builtin.shell: dnf repolist | grep -a "google-chrome " | wc -l
+      changed_when: false
+      register: rpm
+
+    - name: Enabled google-chrome
+      ansible.builtin.shell: dnf config-manager setopt google-chrome.enabled=1
+      become: true
+      when: rpm.stdout == "0"
+      
+
+    - name: Check if rpmfusion-free is already present
+      ansible.builtin.shell: dnf repolist --all | grep -a "rpmfusion-free " | wc -l
+      changed_when: false
+      register: rpm
+
+    - name: Register rpmfusion-free
+      ansible.builtin.shell: rpm --import 'https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-fedora-2020' && sync && dnf install 'https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-'$(rpm -E %fedora)'.noarch.rpm' -y && sync
+      become: true
+      when: rpm.stdout == "0"
+
+    - name: Check if rpmfusion-nonfree is already present
+      ansible.builtin.shell: dnf repolist --all | grep -a "rpmfusion-nonfree " | wc -l
+      changed_when: false
+      register: rpm
+
+    - name: Register rpmfusion-nonfree
+      ansible.builtin.shell: rpm --import 'https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-nonfree-fedora-2020' && sync && dnf install 'https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-'$(rpm -E %fedora)'.noarch.rpm' -y && sync
+      become: true
+      when: rpm.stdout == "0"
+
+
+    - name: Install a list of packages
+      become: true
+      ansible.builtin.dnf5:
+        name:
+          - dnfdragora
+          - gimp
+          - inkscape
+          - pandoc
+          - google-chrome-stable
+          - texlive-scheme-full
+          - keepassxc
+          - dropbox
+          - steam
+          - libreoffice
+          - '@Development Libraries'
+        state: present
+
+    - name: Check if ffmpeg-free is present
+      ansible.builtin.shell: rpm -qa | grep -a "ffmpeg-free" | wc -l
+      changed_when: false
+      register: rpm
+
+    - name: Swap ffmpeg-free ffmpeg
+      ansible.builtin.shell: dnf swap ffmpeg-free ffmpeg --allowerasing -y
+      become: true
+      when: rpm.stdout == "1"
+
+    - name: Update multimedia group
+      ansible.builtin.shell: dnf update @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin -y
+      become: true
+      when: rpm.stdout == "1"
+
+    - name: Check if amdgpu is preset
+      ansible.builtin.shell: lspci -k | grep -EA3 'VGA|3D|Display' | grep amdgpu | wc -l
+      changed_when: false
+      register: amdgpu
+
+    - name: Swap mesa drivers
+      ansible.builtin.shell: dnf swap mesa-va-drivers mesa-va-drivers-freeworld -y && dnf swap mesa-vdpau-drivers mesa-vdpau-drivers-freeworld -y
+      become: true
+      register: result
+      changed_when: '"Nothing to do." not in result.stdout'
+      when: not amdgpu.stdout == "0"
+
+    - name: Check if libdvdcss is present
+      ansible.builtin.shell: rpm -qa | grep -a "libdvdcss" | wc -l
+      become: true
+      changed_when: false      
+      register: rpm
+
+    - name: Install libdvdcss
+      ansible.builtin.shell: dnf install rpmfusion-free-release-tainted -y && dnf install libdvdcss -y
+      become: true
+      when: rpm.stdout == "0"
+
+    - name: NonFree firmwares
+      ansible.builtin.shell: rpm -qa | grep -a "rpmfusion-nonfree-release-tainted" | wc -l
+      changed_when: false
+      become: true
+      register: rpm
+
+    - name: Install libdvdcss
+      ansible.builtin.shell: dnf install rpmfusion-nonfree-release-tainted -y && dnf --repo=rpmfusion-nonfree-tainted install "*-firmware" -y
+      become: true
+      when: rpm.stdout == "0"
+
+    - name: NonFree firmwares
+      ansible.builtin.shell: flatpak remotes | grep flathub | wc -l
+      changed_when: false
+      register: flatpak
+
+    - name: Install libdvdcss
+      ansible.builtin.shell: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+      when: flatpak.stdout == "0"
+
+    - name: Install the flatpak packages from flathub
+      community.general.flatpak:
+        name: "{{ item  }}"
+        state: present
+      loop:
+        - com.jetbrains.Rider
+        - com.discordapp.Discord
+        - app.freelens.Freelens
+        - org.kde.kdenlive
+        - org.signal.Signal
+        - org.soapui.SoapUI
