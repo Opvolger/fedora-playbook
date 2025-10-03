@@ -25,5 +25,5 @@
     - name: Install the latest version of VS Code
       ansible.builtin.dnf:
         name: code
-        state: latest
+        state: present
       become: true

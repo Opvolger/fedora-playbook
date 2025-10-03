@@ -1,0 +1,42 @@
+- name: Install VSCode
+  hosts: localhost
+  tasks:
+    - name: Check if gpg key Slack is already present
+      ansible.builtin.shell: rpm -q --queryformat "%{SUMMARY}\n" $(rpm -q gpg-pubkey) | grep -a "Slack" | wc -l
+      changed_when: false
+      register: rpm
+
+    - name: Rpm install gpg key Slack
+      ansible.builtin.shell: rpm --import https://slack.com/gpg/slack_pubkey_20240822.gpg
+      become: true
+      when: rpm.stdout == "0"
+
+    - name: Get stats of /etc/yum.repos.d/slack.repo
+      ansible.builtin.stat:
+        path: /etc/yum.repos.d/slack.repo
+      register: repo
+      become: true
+
+    - name: Creating /etc/yum.repos.d/slack.repo
+      become: true
+      ansible.builtin.copy:
+        dest: "/etc/yum.repos.d/slack.repo"
+        content: |
+          [slack]
+          name=slack
+          baseurl=https://packagecloud.io/slacktechnologies/slack/fedora/21/x86_64
+          enabled=1
+          gpgcheck=0
+          gpgkey=https://packagecloud.io/gpg.key
+          sslverify=1
+          sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+        owner: root
+        group: root
+        mode: u=rw,g=r,o=r
+      when: not repo.stat.exists
+
+    - name: Install the latest version of slack
+      ansible.builtin.dnf:
+        name: slack
+        state: present
+      become: true
