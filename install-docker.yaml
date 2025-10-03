@@ -37,8 +37,17 @@
         state: started
         enabled: true
 
-    - name: Install/Update kubectl
+    - name: Get stats of /usr/local/bin/kubectl
+      ansible.builtin.stat:
+        path: /usr/local/bin/kubectl
+      register: repo
+      become: true
+
+    # todo create fact and rewrite with ansible.builtin.get_url
+    - name: Install kubectl
       ansible.builtin.shell: |
         curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && \
         chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
       become: true
+      changed_when: true
+      when: not repo.stat.exists
