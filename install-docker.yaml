@@ -1,4 +1,4 @@
-- name: Install Docker CE
+- name: Install Docker CE / helm / kubectl
   hosts: localhost
   tasks:
 
@@ -37,17 +37,23 @@
         state: started
         enabled: true
 
-    - name: Get stats of /usr/local/bin/kubectl
-      ansible.builtin.stat:
-        path: /usr/local/bin/kubectl
-      register: repo
+    - name: Creating /etc/yum.repos.d/kubernetes.repo
       become: true
+      ansible.builtin.copy:
+        dest: "/etc/yum.repos.d/kubernetes.repo"
+        content: |
+          [kubernetes]
+          name=Kubernetes
+          baseurl=https://pkgs.k8s.io/core:/stable:/{{ kubectl_version }}/rpm/
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://pkgs.k8s.io/core:/stable:/{{ kubectl_version }}/rpm/repodata/repomd.xml.key
+        owner: root
+        group: root
+        mode: u=rw,g=r,o=r
 
-    # todo create fact and rewrite with ansible.builtin.get_url
-    - name: Install kubectl
-      ansible.builtin.shell: |
-        curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && \
-        chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - name: Install the latest version of slack
+      ansible.builtin.dnf:
+        name: kubectl
+        state: present
       become: true
-      changed_when: true
-      when: not repo.stat.exists

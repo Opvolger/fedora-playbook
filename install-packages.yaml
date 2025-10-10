@@ -1,0 +1,14 @@
+- name: Install packages
+  hosts: localhost
+  tasks:
+
+    - name: Install a list of packages
+      become: true
+      ansible.builtin.dnf5:
+        name: "{{ dnf_packages }}"
+        state: present
+
+    - name: Install the flatpak packages
+      community.general.flatpak:
+        name: "{{ flatpak_packages }}"
+        state: present

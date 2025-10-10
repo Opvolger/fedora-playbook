@@ -1,0 +1,42 @@
+# check latest version on: https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
+kubectl_version: v1.34
+
+# rpm packages to install
+dnf_packages:
+  - dnfdragora
+  - gimp
+  - inkscape
+  - pandoc
+  - google-chrome-stable
+  - texlive-scheme-full
+  - keepassxc
+  - dropbox
+  - steam
+  - libreoffice
+  - openal-soft-devel
+  - git
+  - gcc-plugin-devel
+  - screen
+  - gparted
+  - libmpc-devel
+  - kate
+  - gcc-c++
+  - gcc-c++-riscv64-linux-gnu
+  - ncurses-devel
+  - nano
+  - flex
+  - bison
+  - SDL2-devel
+  - SDL3-devel
+  - libglvnd-devel
+  - libdvdcss
+  - "@Development Libraries"
+
+# flatpak packages to install
+flatpak_packages:
+  - com.jetbrains.Rider
+  - com.discordapp.Discord
+  - app.freelens.Freelens
+  - org.kde.kdenlive
+  - org.signal.Signal
+  - org.soapui.SoapUI

@@ -70,80 +70,15 @@
       become: true
       when: rpm.stdout == "go"
 
-
-    - name: Install a list of packages
+    - name: Install rpmfusion release-tainted packages
       become: true
       ansible.builtin.dnf5:
         name:
-          - dnfdragora
-          - gimp
-          - inkscape
-          - pandoc
-          - google-chrome-stable
-          - texlive-scheme-full
-          - keepassxc
-          - dropbox
-          - steam
-          - libreoffice
-          - openal-soft-devel
-          - SDL2-devel
-          - SDL3-devel
-          - libglvnd-devel
-          - '@Development Libraries'
           - rpmfusion-nonfree-release-tainted
           - rpmfusion-free-release-tainted
         state: present
 
-    - name: Check if ffmpeg-free is present
-      ansible.builtin.shell: |
-        set -o pipefail
-        rpm -qa | grep -a "ffmpeg-free" || echo "gone"
-      changed_when: false
-      register: rpm
-
-    - name: Swap ffmpeg-free ffmpeg
-      ansible.builtin.shell: |
-        dnf swap ffmpeg-free ffmpeg --allowerasing -y
-      register: result
-      changed_when: '"Nothing to do." not in result.stdout'
-      become: true
-      when: not rpm.stdout == "gone"
-
-    - name: Update multimedia group
-      ansible.builtin.command: dnf update @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin -y
-      become: true
-      register: result
-      changed_when: '"Nothing to do." not in result.stdout'
-      when: rpm.stdout == "1"
-
-    - name: Check if amdgpu is preset
-      ansible.builtin.shell: |
-        set -o pipefail
-        lspci -k | grep -EA3 'VGA|3D|Display' | grep amdgpu || echo "go"
-      changed_when: false
-      register: amdgpu
-
-    - name: Swap mesa drivers
-      ansible.builtin.shell: dnf swap mesa-va-drivers mesa-va-drivers-freeworld -y && dnf swap mesa-vdpau-drivers mesa-vdpau-drivers-freeworld -y
-      become: true
-      register: result
-      changed_when: '"Nothing to do." not in result.stdout'
-      when: not amdgpu.stdout == "go"
-
-    - name: Install libdvdcss
-      become: true
-      ansible.builtin.dnf5:
-        name:
-          - libdvdcss
-        state: present
-
-    - name: Install firmwares from rpmfusion-nonfree-tainted
-      ansible.builtin.shell: dnf --repo=rpmfusion-nonfree-tainted install "*-firmware" -y
-      become: true
-      register: result
-      changed_when: '"Nothing to do." not in result.stdout'
-
-    - name: NonFree firmwares
+    - name: Check if flathub.org is present
       ansible.builtin.shell: |
         set -o pipefail
         flatpak remotes | grep flathub || echo "go"
@@ -155,15 +90,3 @@
       ansible.builtin.command: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
       changed_when: true
       when: flatpak.stdout == "go"
-
-    - name: Install the flatpak packages from flathub
-      community.general.flatpak:
-        name: "{{ item }}"
-        state: present
-      loop:
-        - com.jetbrains.Rider
-        - com.discordapp.Discord
-        - app.freelens.Freelens
-        - org.kde.kdenlive
-        - org.signal.Signal
-        - org.soapui.SoapUI

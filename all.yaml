@@ -1,14 +1,20 @@
-- name: Install vscode
-  ansible.builtin.import_playbook: install-code.yaml
-
 - name: Install docker-ce
   ansible.builtin.import_playbook: install-docker.yaml
+
+- name: Install Virtualization
+  ansible.builtin.import_playbook: install-virt.yaml
 
 - name: Install Slack
   ansible.builtin.import_playbook: install-slack.yaml
 
-- name: Install Tools
-  ansible.builtin.import_playbook: install-tools.yaml
+- name: Install vscode
+  ansible.builtin.import_playbook: install-code.yaml
 
-- name: Install Virtualization
-  ansible.builtin.import_playbook: install-virt.yaml
+- name: Install add repos
+  ansible.builtin.import_playbook: install-add-repos.yaml
+
+- name: Install swap codecs
+  ansible.builtin.import_playbook: install-swap-codecs.yaml
+
+- name: Install packages
+  ansible.builtin.import_playbook: install-packages.yaml

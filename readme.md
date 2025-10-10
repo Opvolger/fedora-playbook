@@ -15,12 +15,11 @@ create file `~/.ansible.cfg`
 ```ini
 [defaults]
 host_key_checking = False
-hash_behaviour=merge
 callbacks_enabled = profile_tasks, timer
 private_key_file = ~/.ssh/id_ed25519
-stdout_callback = yaml
 forks=15
 pipelining = True
+callback_result_format = yaml
 
 [ssh_connection]
 ssh_args = -o ControlMaster=auto -o ControlPersist=60s
