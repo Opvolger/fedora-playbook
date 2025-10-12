@@ -1,5 +1,6 @@
 - name: Install Docker CE / helm / kubectl
   hosts: localhost
+  gather_facts: false
   tasks:
 
     - name: Check if docker repo is present
@@ -52,7 +53,13 @@
         group: root
         mode: u=rw,g=r,o=r
 
-    - name: Install the latest version of slack
+    - name: Import kubectl key
+      become: true
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://pkgs.k8s.io/core:/stable:/{{ kubectl_version }}/rpm/repodata/repomd.xml.key
+
+    - name: Install the latest version of kubectl
       ansible.builtin.dnf:
         name: kubectl
         state: present

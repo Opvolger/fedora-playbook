@@ -1,5 +1,6 @@
 - name: Install VSCode
   hosts: localhost
+  gather_facts: false
   tasks:
     - name: Import Microsoft key
       become: true

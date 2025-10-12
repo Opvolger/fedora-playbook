@@ -1,5 +1,6 @@
 - name: Install swap codecs and install hardware firmware
   hosts: localhost
+  gather_facts: false
   tasks:
 
     - name: Check if ffmpeg-free is present

@@ -1,5 +1,6 @@
 - name: Install Slack
   hosts: localhost
+  gather_facts: false
   tasks:
     - name: Import Slack key
       become: true

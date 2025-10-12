@@ -1,5 +1,6 @@
 - name: Install tools + multimedia
   hosts: localhost
+  gather_facts: false
   tasks:
 
     - name: Check if rpmfusion-nonfree-steam is already enabled
