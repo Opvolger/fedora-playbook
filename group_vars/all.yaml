@@ -32,6 +32,8 @@ dnf_packages:
   - libdvdcss
   - "@Development Libraries"
   - chromedriver
+  - python3-defusedxml
+  - meld
 
 # flatpak packages to install
 flatpak_packages:
