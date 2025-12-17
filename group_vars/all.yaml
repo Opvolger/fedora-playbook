@@ -36,6 +36,10 @@ dnf_packages:
   - meld
   - swig
   - openssl-devel-engine
+  - gnutls-devel
+  - sshpass
+  - python3-pykcs11
+  - python3-kubernetes
 
 # flatpak packages to install
 flatpak_packages:
