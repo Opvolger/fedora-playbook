@@ -40,6 +40,23 @@
       changed_when: '"Nothing to do." not in result.stdout'
       when: not amdgpu.stdout == "go"
 
+    - name: Check if nvidia is preset
+      ansible.builtin.shell: |
+        set -o pipefail
+        lspci -k | grep -EA3 'VGA|3D|Display' | grep -i nvidia || echo "go"
+      changed_when: false
+      register: nvidia
+
+    - name: NVIDIA drivers and bridge NVDEC/NVENC with VAAPI
+      become: true
+      ansible.builtin.dnf5:
+        name:
+          - akmod-nvidia
+          - xorg-x11-drv-nvidia-cuda
+          - libva-nvidia-driver
+        state: present
+      when: not nvidia.stdout == "go"
+
     - name: Install firmwares from rpmfusion-nonfree-tainted
       ansible.builtin.shell: dnf --repo=rpmfusion-nonfree-tainted install "*-firmware" -y
       become: true

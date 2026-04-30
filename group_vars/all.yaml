@@ -43,7 +43,7 @@ dnf_packages:
 
 # flatpak packages to install
 flatpak_packages:
-  - com.jetbrains.Rider
+  # - com.jetbrains.Rider
   - com.discordapp.Discord
   - app.freelens.Freelens
   - org.kde.kdenlive

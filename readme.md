@@ -41,7 +41,6 @@ ansible-playbook install-slack.yaml --ask-become-pass -vv
 
 [Multimedia](https://rpmfusion.org/Howto/Multimedia)
 
-
 ```bash
 ansible-playbook install-tools.yaml --ask-become-pass -vv
 ```
