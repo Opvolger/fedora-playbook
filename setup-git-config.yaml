@@ -28,6 +28,8 @@
         content: |
           [user]
             email = bas.magre@topicus.nl
+          [core]
+            sshcommand = ssh -i ~/.ssh/id_ed25519
         owner: opvolger
         group: opvolger
         mode: u=rw,g=r,o=r
@@ -38,6 +40,8 @@
         content: |
           [user]
             email = bas@opvolger.net
+          [core]
+            sshcommand = ssh -i ~/.ssh/id_github_prive
         owner: opvolger
         group: opvolger
         mode: u=rw,g=r,o=r
