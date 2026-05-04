@@ -1,9 +1,13 @@
 # check latest version on: https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
 kubectl_version: v1.34
 
+# TODO add
+# sudo yum install -y https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm
+
 # rpm packages to install
 dnf_packages:
   - dnfdragora
+  - awscli2
   - mkcert
   - policycoreutils-devel # needed for ESET build (selinux Makefile)
   - gimp
