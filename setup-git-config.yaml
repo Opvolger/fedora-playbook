@@ -1,0 +1,43 @@
+# default to work config
+
+
+- name: Config git
+  hosts: localhost
+  gather_facts: false
+  tasks:
+
+    - name: Creating /home/opvolger/.gitconfig
+      ansible.builtin.copy:
+        dest: "/home/opvolger/.gitconfig"
+        content: |
+          [user]
+            name = Bas Magré
+
+          [include]
+            path = ~/.gitconfig.zorg
+
+          [includeIf "gitdir:**/code/**/.git"]
+            path = ~/.gitconfig.code
+        owner: opvolger
+        group: opvolger
+        mode: u=rw,g=r,o=r
+
+    - name: Creating /home/opvolger/.gitconfig
+      ansible.builtin.copy:
+        dest: "/home/opvolger/.gitconfig.zorg"
+        content: |
+          [user]
+            email = bas.magre@topicus.nl
+        owner: opvolger
+        group: opvolger
+        mode: u=rw,g=r,o=r
+
+    - name: Creating /home/opvolger/.gitconfig
+      ansible.builtin.copy:
+        dest: "/home/opvolger/.gitconfig.code"
+        content: |
+          [user]
+            email = bas@opvolger.net
+        owner: opvolger
+        group: opvolger
+        mode: u=rw,g=r,o=r

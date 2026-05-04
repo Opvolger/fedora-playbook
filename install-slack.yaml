@@ -6,7 +6,7 @@
       become: true
       ansible.builtin.rpm_key:
         state: present
-        key: https://slack.com/gpg/slack_pubkey_20240822.gpg
+        key: https://slack.com/gpg/slack_pubkey_20251016.gpg
 
     - name: Creating /etc/yum.repos.d/slack.repo
       become: true
@@ -19,7 +19,7 @@
           enabled=1
           gpgcheck=0
           gpgkey=https://packagecloud.io/gpg.key
-          sslverify=1
+          sslverify=0
           sslcacert=/etc/pki/tls/certs/ca-bundle.crt
         owner: root
         group: root

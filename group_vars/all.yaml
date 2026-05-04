@@ -4,6 +4,8 @@ kubectl_version: v1.34
 # rpm packages to install
 dnf_packages:
   - dnfdragora
+  - mkcert
+  - policycoreutils-devel # needed for ESET build (selinux Makefile)
   - gimp
   - inkscape
   - pandoc
