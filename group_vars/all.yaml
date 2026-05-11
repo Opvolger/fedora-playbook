@@ -1,14 +1,26 @@
 # check latest version on: https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
 kubectl_version: v1.34
 
+# allemaal macbook waar je geluid van kan regelen op het netwerk :(
+# sudo dnf remove pipewire-config-raop
+
+
 # TODO add
 # sudo yum install -y https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm
+
+# $ sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+# $ curl https://packages.microsoft.com/config/rhel/7/prod.repo | sudo tee /etc/yum.repos.d/microsoft.repo
+# $ sudo dnf makecache
+# $ sudo dnf install powershell
+# $ sudo dnf install mssql-tools18
+# $ echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
 
 # rpm packages to install
 dnf_packages:
   - dnfdragora
   - awscli2
   - mkcert
+  - htop
   - policycoreutils-devel # needed for ESET build (selinux Makefile)
   - gimp
   - inkscape
